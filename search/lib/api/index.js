@@ -26,7 +26,7 @@ async function getHealth (res) {
 
 const routes = express.Router();
 
-routes.use('/docs', express.static(path.join(__dirname, 'index.html')));
+routes.use('/docs', express.static(path.join(__dirname, '../../docs/newindex.html')));
 routes.use('/health', (req, res) => getHealth(res));
 routes.use(provider.routes);
 routes.use(stac.routes);
