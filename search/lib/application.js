@@ -49,7 +49,7 @@ async function initialize () {
   application.use(express.json());
   application.use(cors());
   application.use(awsServerlessMiddleware.eventContext());
-  application.use(urlRewriteMiddleware);
+  //application.use(urlRewriteMiddleware);
   application.use(settings.cmrStacRelativeRootUrl, api.routes);
   application.use(errorHandler);
 
