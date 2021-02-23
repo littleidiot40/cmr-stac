@@ -13,7 +13,7 @@ function getStacSettings () {
   const stacSettings = {};
 
   stacSettings.version = process.env.STAC_VERSION || '1.0.0-beta.2';
-  stacSettings.stacRelativePath = process.env.STAC_RELATIVE_PATH || '/stac';
+  stacSettings.stacRelativePath = process.env.STAC_RELATIVE_PATH || '/cmr-stac';
 
   return stacSettings;
 }
@@ -51,7 +51,7 @@ function getSettings () {
 
     // comma separated list of URL aliases
     settings.cmrStacRouteAliases = process.env.CMR_STAC_ROOT_ALIASES || '/cmr-stac';
-    settings.cmrStacRelativeRootUrl = process.env.CMR_STAC_RELATIVE_ROOT_URL || '/stac';
+    settings.cmrStacRelativeRootUrl = process.env.CMR_STAC_RELATIVE_ROOT_URL || '/cmr-stac';
     settings.cmrSearchHost = process.env.CMR_SEARCH_HOST || 'cmr.earthdata.nasa.gov/search';
     settings.cmrProviderHost = process.env.CMR_PROVIDER_HOST || 'cmr.earthdata.nasa.gov/ingest/providers';
     settings.cmrSearchProtocol = process.env.CMR_SEARCH_PROTOCOL || 'https';
