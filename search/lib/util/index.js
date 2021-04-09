@@ -19,8 +19,9 @@ function getHostHeader (event) {
 }
 
 function getProtoHeader (event) {
-  return getKeyCaseInsensitive(event.headers, 'CloudFront-Forwarded-Proto') ||
-    getKeyCaseInsensitive(event.headers, 'X-Forwarded-Proto') || 'http';
+  //return getKeyCaseInsensitive(event.headers, 'CloudFront-Forwarded-Proto') ||
+  //  getKeyCaseInsensitive(event.headers, 'X-Forwarded-Proto') || 'http';
+  return 'https'
 }
 
 function createRedirectUrl (event, redirectPath) {
