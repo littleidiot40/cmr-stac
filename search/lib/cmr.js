@@ -33,13 +33,19 @@ const DEFAULT_HEADERS = {
  * @param {string} path CMR path to append to search URL (e.g., granules.json, collections.json)
  * @param {object} params Set of CMR parameters
  */
-async function cmrSearch (path, params) {
-  // should be search path (e.g., granules.json, collections, etc)
-  if (!path) throw new Error('Missing url');
-  if (!params) throw new Error('Missing parameters');
-  const url = makeCmrSearchUrl(path);
-  logger.debug(`CMR Search: ${url} with params: ${JSON.stringify(params)}`);
-  return axios.get(url, { params, headers: DEFAULT_HEADERS });
+async function cmrSearch(path, params) {
+  try {
+    // should be search path (e.g., granules.json, collections, etc)
+    if (!path) throw new Error('Missing url');
+    if (!params) throw new Error('Missing parameters');
+    const url = makeCmrSearchUrl(path);
+    logger.debug(`CMR Search: ${url} with params: ${JSON.stringify(params)}`);
+    return axios.get(url, { params, headers: DEFAULT_HEADERS });
+  }
+  catch (error) {
+    logger.error(error.message);
+    throw error;
+  }
 }
 
 /**
@@ -47,7 +53,7 @@ async function cmrSearch (path, params) {
  * @param {string} path CMR path to append to search URL (e.g., granules.json, collections.json)
  * @param {object} params Set of CMR parameters
  */
-async function cmrSearchPost (path, params) {
+async function cmrSearchPost(path, params) {
   // should be search path (e.g., granules.json, collections, etc)
   if (!path) throw new Error('Missing url');
   if (!params) throw new Error('Missing parameters');
@@ -58,20 +64,27 @@ async function cmrSearchPost (path, params) {
 /**
  * Get list of providers
  */
-async function getProviderList () {
-  const providerUrl = UrlBuilder.create()
-    .withProtocol(settings.cmrSearchProtocol)
-    .withHost(settings.cmrProviderHost)
-    .build();
-  const rawProviders = await axios.get(providerUrl);
-  return rawProviders.data;
+async function getProviderList() {
+  try {
+    const providerUrl = UrlBuilder.create()
+      .withProtocol(settings.cmrSearchProtocol)
+      .withHost(settings.cmrProviderHost)
+      .build();
+    logger.info(`Getting providers from ${settings.cmrSearchProtocol}://${settings.cmrProviderHost}`);
+    const rawProviders = await axios.get(providerUrl);
+    return rawProviders.data;
+  }
+  catch (error) {
+    logger.error(error.message);
+    throw error;
+  }
 }
 
 /**
  * Get set of collections for provider
  * @param {string} providerId The CMR Provider ID
  */
-async function getProvider (providerId) {
+async function getProvider(providerId) {
   const response = await cmrSearch('provider_holdings.json', { providerId });
   return response.data;
 }
@@ -80,7 +93,7 @@ async function getProvider (providerId) {
  * Search CMR for collections matching query parameters
  * @param {object} params CMR Query parameters
  */
-async function findCollections (params = {}) {
+async function findCollections(params = {}) {
   const response = await cmrSearch('/collections.json', params);
   return response.data.feed.entry;
 }
@@ -89,7 +102,7 @@ async function findCollections (params = {}) {
  * Search CMR for granules matching CMR query parameters
  * @param {object} params Object of CMR Search parameters
  */
-async function findGranules (params = {}) {
+async function findGranules(params = {}) {
   let response, responseUmm;
   if (settings.cmrStacRelativeRootUrl === '/cloudstac') {
     response = await cmrSearchPost('/granules.json', params);
@@ -126,7 +139,7 @@ async function findGranules (params = {}) {
  * @param {string} providerId The CMR Provider ID
  * @param {string} collectionId The STAC Collection ID
  */
-function stacCollectionToCmrParams (providerId, collectionId) {
+function stacCollectionToCmrParams(providerId, collectionId) {
   const parts = collectionId.split('.v');
   if (parts.length < 2) {
     return null;
@@ -149,7 +162,7 @@ function stacCollectionToCmrParams (providerId, collectionId) {
  * @param {string} providerId CMR Provider ID
  * @param {string} stacId A STAC COllection ID
  */
-async function stacIdToCmrCollectionId (providerId, stacId) {
+async function stacIdToCmrCollectionId(providerId, stacId) {
   let collectionId = myCache.get(stacId);
   if (collectionId) {
     return collectionId;
@@ -173,7 +186,7 @@ async function stacIdToCmrCollectionId (providerId, stacId) {
  * @param {string} providerId CMR Provider ID
  * @param {string} collectionId CMR Collection ID
  */
-async function cmrCollectionIdToStacId (collectionId) {
+async function cmrCollectionIdToStacId(collectionId) {
   let stacId = myCache.get(collectionId);
   if (stacId) {
     return stacId;
@@ -184,7 +197,7 @@ async function cmrCollectionIdToStacId (collectionId) {
   return stacId;
 }
 
-function getFacetParams (year, month, day) {
+function getFacetParams(year, month, day) {
   // add temporal facet specific paramters
   const facetParams = {
     include_facets: 'v2',
@@ -203,7 +216,7 @@ function getFacetParams (year, month, day) {
   return facetParams;
 }
 
-async function getGranuleTemporalFacets (params = {}, year, month, day) {
+async function getGranuleTemporalFacets(params = {}, year, month, day) {
   const { tag_key, ...cmrParams } = Object.assign(params, getFacetParams(year, month, day));
 
   const facets = {
@@ -253,7 +266,7 @@ async function getGranuleTemporalFacets (params = {}, year, month, day) {
  * @param entries Array of Name/Value pairs to be converted to object. e.g. [["name", "value"]]
  * @returns object e.g. {name: "value"}
  */
-function fromEntries (entries) {
+function fromEntries(entries) {
   if (!entries) throw new Error('Missing entries!');
 
   return entries.reduce((obj, entry) => {
@@ -268,7 +281,7 @@ function fromEntries (entries) {
  * @param {string} key The STAC field name
  * @param {string} value The STAC value
  */
-async function convertParam (providerId, key, value) {
+async function convertParam(providerId, key, value) {
   // Invalid STAC parameter
   if (!Object.keys(STAC_SEARCH_PARAMS_CONVERSION_MAP).includes(key)) {
     throw new Error(`Unsupported parameter ${key}`);
@@ -303,7 +316,7 @@ async function convertParam (providerId, key, value) {
  * @param {string} providerId CMR Provider ID
  * @param {object} params STAC parameters
  */
-async function convertParams (providerId, params = {}) {
+async function convertParams(providerId, params = {}) {
   try {
     // async map to do all param conversions in parallel
     const converted = await Promise.reduce(Object.entries(params), async (result, [k, v]) => {

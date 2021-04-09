@@ -13,8 +13,6 @@ provider:
 custom:
   cmrStacName: ${opt:cmr-stac-name}
   cmrStacRelativeRootUrl: ${opt:cmr-stac-relative-root-url, '/stac'}
-  logSubscription:
-      destinationArn: ${cf:${opt:stage}.logForwardingArn}
   docsBucket: cmr-stac-static-bucket-${opt:stage}
   assets:
     targets:
@@ -37,7 +35,6 @@ functions:
           priority: ${opt:cmr-lb-priority, 83}
           conditions:
             path: ${self:custom.cmrStacRelativeRootUrl}*
-    logSubscription: true
     environment:
       CMR_SEARCH_HOST: ${opt:cmr-search-host, 'cmr.earthdata.nasa.gov/search'}
       CMR_PROVIDER_HOST: ${opt:cmr-provider-host, 'cmr.earthdata.nasa.gov/ingest/providers'}
@@ -73,5 +70,4 @@ resources:
 
 plugins:
   - serverless-pseudo-parameters
-  - serverless-plugin-log-subscription
   - serverless-s3-deploy

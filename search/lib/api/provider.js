@@ -81,6 +81,7 @@ async function getProvider (request, response) {
  * Fetch a list of providers from CMR.
  */
 async function getProviders (request, response) {
+  logger.info(`Getting providers...`);
   const event = request.apiGateway.event;
   const providers = await cmr.getProviderList();
   const providerLinks = await Promise.map(providers, async (provider) => {
